@@ -1,9 +1,10 @@
 #!/usr/bin/Python3
-import random
 import GA
 import neuralnet
 import agent
+import QLearner
 from parameters import Parameters as p
+import numpy as np
 
 def evo_net():
     g = GA.GA(); nn = neuralnet.NN(); a = agent.agent(); t = agent.target()
@@ -32,7 +33,7 @@ def evo_net():
                     a.update_state_vec(t.tx, t.ty)  # Updates state input to NN
                     nn.get_inputs(a.state_vector)
                     act = nn.get_ouput()  # Get output from NN
-                    a.agent_move(act, p.x_dim, p.y_dim)  # Agent moves
+                    a.agent_move(act)  # Agent moves
                     a.update_reward(t.tx, t.ty)
 
                     if a.goal_captured == True:
@@ -57,7 +58,7 @@ def evo_net():
                         a.update_state_vec(t.tx, t.ty)  # Updates state input to NN
                         nn.get_inputs(a.state_vector)
                         act = nn.get_ouput()  # Get output from NN
-                        a.agent_move(act, p.x_dim, p.y_dim)  # Agent moves
+                        a.agent_move(act)  # Agent moves
                         a.update_reward(t.tx, t.ty)
 
                         if a.goal_captured == True:
@@ -77,7 +78,7 @@ def evo_net():
                 a.update_state_vec(t.tx, t.ty)
                 nn.get_inputs(a.state_vector)
                 act = nn.get_ouput()
-                a.agent_move(act, p.x_dim, p.y_dim)
+                a.agent_move(act)
                 a.update_reward(t.tx, t.ty)
 
                 if a.goal_captured == True:
@@ -95,12 +96,67 @@ def evo_net():
     saveFile.close(); rFile.close(); dataFile.close()
 
 def qLearn():
-    a = agent.agent(); t = agent.target()
+    a = agent.agent(); t = agent.target(); ql = QLearner.QLearner()
+
+    # Initialize vectors and starting coordinates for agents and targets
+    ql.reset_qTable()
+    a.assign_acoords(p.x_dim, p.y_dim)
+    t.assign_tcoords(p.x_dim, p.y_dim, a.ax_init, a.ay_init)
+    ql.update_state(a.agent_x, a.agent_y)
+
+    # Create output files
+    saveFile = open('BestFit.txt', 'w')  # Records best fitnesses
+    rFile = open('SystemReward.txt', 'w')
+    dataFile = open('Reliability.txt', 'w')  # Records how successful trained NN is using "best" policy
+
+    for srun in range(p.stat_runs):
+        print('current stat run: ', srun)
+        ql.reset_qTable()
+
+        for ep in range(p.episodes):
+
+            for k in range(p.steps):
+                act = ql.select_move()
+                a.agent_move(act)
+                a.update_rewardQ(t.tx, t.ty)
+                ql.update_qTable(a.agent_reward, act)
+                ql.update_state(a.agent_x, a.agent_y)
+
+            a.reset_agent()
+            saveFile.write('%f' % np.max(ql.qtable[:, :])); saveFile.write('\t')  # Records max reward in Qtable
+
+
+        # Test Best Policy Found
+        a.reset_agent(); ql.update_state(a.agent_x, a.agent_y)
+        a.goal_captured = False; a.agent_reward = 0.00; k = 0
+
+        while k < p.steps:
+            a.update_state_vec(t.tx, t.ty)
+            act = ql.select_move()
+            a.agent_move(act)
+            a.update_reward(t.tx, t.ty)
+
+            if a.goal_captured == True:
+                k = p.steps  # Stop iterating if target is captured
+            k += 1
+
+        system_reward = 0.00
+        if a.goal_captured == True:
+            dataFile.write('%d' % 1); dataFile.write('\t')
+        if a.goal_captured == False:
+            dataFile.write('%d' % 0); dataFile.write('\t')
+
+        system_reward += a.agent_reward
+        rFile.write('%f' % system_reward); rFile.write('\t')
+        saveFile.write('\n'); rFile.write('\n'); dataFile.write('\n')  # New line for new stat run
+    saveFile.close(); rFile.close(); dataFile.close()
 
 
 def main():
     if p.agent_method == 'EA':
         evo_net()
+    elif p.agent_method == 'QLearn':
+        qLearn()
 
 
 main()  # Run the program

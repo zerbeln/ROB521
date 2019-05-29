@@ -1,5 +1,6 @@
 #!/usr/bin/Python3
 import random
+from parameters import Parameters as p
 
 class agent:
     agent_x = 0  # agent X-coordinate
@@ -10,25 +11,25 @@ class agent:
     agent_reward = 0  # Agent's reward value
     goal_captured = False
 
-    def agent_move(self, action, xd, yd):
-        assert (action > 0 and action < 5)
+    def agent_move(self, action):
+        assert (action >= 0 and action < 4)
 
-        if action == 1:  # Agent moves "left"
+        if action == 0:  # Agent moves "left"
             self.agent_x -= 1
             while self.agent_x < 0:  # Cannot move out of bounds
                 self.agent_x += 1
 
-        if action == 2:  # Agent moves "right"
+        if action == 1:  # Agent moves "right"
             self.agent_x += 1
-            while self.agent_x > (xd-1):  # Cannot move out of bounds
+            while self.agent_x > (p.x_dim-1):  # Cannot move out of bounds
                 self.agent_x -= 1
 
-        if action == 3:  # Agent moves "up"
+        if action == 2:  # Agent moves "up"
             self.agent_y += 1
-            while self.agent_y > (yd-1):  # Cannot move out of bounds
+            while self.agent_y > (p.y_dim-1):  # Cannot move out of bounds
                 self.agent_y -= 1
 
-        if action == 4:  # Agent moves "down"
+        if action == 3:  # Agent moves "down"
             self.agent_y -= 1
             while self.agent_y < 0:  # Cannot move out of bounds
                 self.agent_y += 1
@@ -51,11 +52,17 @@ class agent:
 
     def update_reward(self, x, y):
         if self.agent_x == x and self.agent_y == y:
-            self.agent_reward += 20.00  # Reward is 20 if target is captured
+            self.agent_reward += 100.00  # Reward is 20 if target is captured
             self.goal_captured = True
         else:
             self.agent_reward -= 1.00  # Reward is -1 for each step taken where target isn't captured
 
+    def update_rewardQ(self, x, y):
+        if self.agent_x == x and self.agent_y == y:
+            self.agent_reward = 100.00  # Reward is 20 if target is captured
+            self.goal_captured = True
+        else:
+            self.agent_reward = -1.00  # Reward is -1 for each step taken where target isn't captured
 
 class target:
     tx = 0  # target X-coordinate
