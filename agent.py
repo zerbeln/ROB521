@@ -8,7 +8,7 @@ class agent:
     ax_init = 0  # initial agent X-coordinate
     ay_init = 0  # initial agent Y-coordinate
     state_vector = []  # Contains state information which is the input for the NN
-    agent_reward = 0  # Agent's reward value
+    agent_reward = 0.0  # Agent's reward value
     goal_captured = False
 
     def agent_move(self, action):
@@ -45,19 +45,21 @@ class agent:
     def reset_agent(self):  # Resets agent to initial position
         self.agent_x = self.ax_init
         self.agent_y = self.ay_init
+        self.goal_captured = False
+        self.agent_reward = 0.0
 
     def update_state_vec(self, x, y):  # State vector consists of x distance and y distance to target
         self.state_vector[0] = x - self.agent_x  # X-distance from agent to target
         self.state_vector[1] = y - self.agent_y  # Y-distance from agent to target
 
-    def update_reward(self, x, y):
+    def update_reward_NN(self, x, y):
         if self.agent_x == x and self.agent_y == y:
             self.agent_reward += 100.00  # Reward is 20 if target is captured
             self.goal_captured = True
         else:
             self.agent_reward -= 1.00  # Reward is -1 for each step taken where target isn't captured
 
-    def update_rewardQ(self, x, y):
+    def update_reward_QL(self, x, y):
         if self.agent_x == x and self.agent_y == y:
             self.agent_reward = 100.00  # Reward is 20 if target is captured
             self.goal_captured = True

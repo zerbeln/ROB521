@@ -1,20 +1,25 @@
 #!/usr/bin/Python3
 import math
-import random
+from parameters import Parameters as p
+import numpy as np
 
 class NN:
-    n_weights = 0  # Number of weights in NN
-    num_in_weights = 0  # Number of weights from input layer to hidden layer
-    num_out_weights = 0  # Number of weights from hidden layer to output layer
-    n_inputs = 0  # Number of inputs
-    n_outputs = 0  # Number of outputs
-    h_layer_size = 0  # Number of nodes in hidden layer
-    input_bias = 1.0  # Biasing weight for input layer weights
-    output_bias = 1.0   # Biasing weight for hidden layer weights
-    in_vec = []   # Input vector for NN
-    h_layer = []  # Hidden Layer vec for NN
-    out_vec = []  # Output vector for NN
-    weight_vec = []  # Vector of weights for NN (weights between 0 and 1)
+
+    def __init__(self):
+        self.input_bias = 1.0  # Biasing weight for input layer weights
+        self.output_bias = 1.0   # Biasing weight for hidden layer weights
+        self.n_inputs = p.ninputs
+        self.num_in_weights = (self.n_inputs + 1) * p.hsize
+        self.num_out_weights = p.noutputs * (p.hsize + 1)
+        self.n_weights = self.num_in_weights + self.num_out_weights
+        self.n_outputs = p.noutputs
+        self.h_layer_size = p.hsize
+
+        # Initialize vectors
+        self.in_vec = np.zeros(self.n_inputs)  # Input Layer
+        self.weight_vec = np.zeros(self.n_weights)
+        self.out_vec = np.zeros(self.n_outputs)  # Output Layer
+        self.h_layer = np.zeros(self.h_layer_size)  # Hidden Layer
 
     def create_NN(self, ninput, noutput, hsize):
         self.n_inputs = ninput
@@ -25,10 +30,10 @@ class NN:
         self.h_layer_size = hsize
 
         # Initialize vectors
-        self.in_vec = [0]*self.n_inputs  # Input Layer
-        self.weight_vec = [0.00]*self.n_weights
-        self.out_vec = [0.00]*self.n_outputs  # Output Layer
-        self.h_layer = [0.00]*self.h_layer_size  # Hidden Layer
+        self.in_vec = np.zeros(self.n_inputs)  # Input Layer
+        self.weight_vec = np.zeros(self.n_weights)
+        self.out_vec = np.zeros(self.n_outputs)  # Output Layer
+        self.h_layer = np.zeros(self.h_layer_size)  # Hidden Layer
 
     def get_inputs(self, state_vec):  # Input states are x distance to the goal and y distance to the goal
         i = 0
@@ -43,7 +48,7 @@ class NN:
             i += 1
 
     def get_ouput(self):
-        action = -1; sum = 0; count = 0
+        action = -1; count = 0
         self.h_layer = [0] * self.h_layer_size  # Hidden Layer resets to values of 0
         self.out_vec = [0] * self.n_outputs  # Output Layer resets to values of 0
 
@@ -72,15 +77,15 @@ class NN:
 
         if self.out_vec[2] < 0.5:  # 3rd output determines if agent moves in X or Y direction
             if self.out_vec[0] < 0.5:  # Output 1 determines if agent moves in pos X or neg X
-                action = 1
+                action = 0
             else:
-                action = 2
+                action = 1
 
         if self.out_vec[2] >= 0.5:
             if self.out_vec[1] < 0.5:  # Output 2 determines if agent moves in pos Y or neg Y
-                action = 3
+                action = 2
             else:
-                action = 4
+                action = 3
         return action
 
     def sigmoid(self, inp):
