@@ -24,10 +24,14 @@ NN_rel = load('Reliability_NN.txt');
 NN_sys_reliability = sum(NN_rel)/stat_runs;
 NN_percentage_rel = NN_sys_reliability*100
 
+%Efficiency
+NN_time_data = load('Alg_Time_NN.txt');
+NN_time = sum(NN_time_data)/stat_runs
+
 %% Q-Learning Data
 stat_runs = 30; %Choose which stat run to make path graph from
 QL_fit_data = load('BestFit_QL.txt');
-episodes = 100;
+episodes = 200;
 x = [1:episodes];
 fitness = mean(QL_fit_data);
 
@@ -46,6 +50,9 @@ QL_rel = load('Reliability_QL.txt');
 QL_sys_reliability = sum(QL_rel)/stat_runs;
 QL_percentage_rel = QL_sys_reliability*100
 
+%Efficiency
+QL_time_data = load('Alg_Time_QL.txt');
+QL_time = sum(QL_time_data)/stat_runs
 
 %% Graphs
 

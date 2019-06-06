@@ -6,7 +6,7 @@ class Parameters:
     x_dim = 5
     y_dim = 5
     steps = 20
-    agent_method = 'QLearn'  # 'EA' for neuralnet, 'QLearn' for Q-Learner
+    agent_method = 'EA'  # 'EA' for neuralnet, 'QLearn' for Q-Learner
 
     # GA Parameters
     generations = 200
@@ -23,4 +23,4 @@ class Parameters:
     alpha = 0.2  # Learning rate
     gamma = 0.1  # Discount factor
     epsilon = 0.1  # Exploration rate
-    episodes = 100  # Number of training episodes for Q learner
+    episodes = 200  # Number of training episodes for Q learner

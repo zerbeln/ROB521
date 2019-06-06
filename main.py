@@ -5,6 +5,7 @@ import agent
 import QLearner
 from parameters import Parameters as p
 import numpy as np
+from time import process_time
 
 def evo_net():
     nn = neuralnet.NN(); g = GA.GA(); a = agent.agent(); t = agent.target()
@@ -18,8 +19,10 @@ def evo_net():
     learning = open('BestFit_NN.txt', 'w')  # Records best fitnesses
     perf = open('SystemReward_NN.txt', 'w')
     rel = open('Reliability_NN.txt', 'w')  # Records how successful trained NN is using "best" policy
+    eff = open('Alg_Time_NN.txt', 'w')
 
     for srun in range(p.stat_runs):
+        time_begin = process_time()
         g.create_pop()  # (policy_size)
         print('current stat run: ', srun)
 
@@ -63,7 +66,12 @@ def evo_net():
                 g.pop_fit[j] = a.agent_reward
 
             g.down_select()  # Establish new parent population
+
+
             learning.write('%f' % g.pop_fit[0]); learning.write('\t')
+        time_end = process_time()
+        total_time = time_end - time_begin
+        eff.write('%f' % total_time); eff.write('\n')
 
         # Test Best Policy Found
         nn.get_weights(g.population[0]); a.reset_agent(); k = 0
@@ -89,7 +97,7 @@ def evo_net():
         system_reward = a.agent_reward
         perf.write('%f' % system_reward); perf.write('\t')
         learning.write('\n'); perf.write('\n'); rel.write('\n')  # New line for new stat run
-    learning.close(); perf.close(); rel.close()
+    learning.close(); perf.close(); rel.close(); eff.close()
 
 def qLearn():
     a = agent.agent(); t = agent.target(); ql = QLearner.QLearner()
@@ -103,9 +111,11 @@ def qLearn():
     learning = open('BestFit_QL.txt', 'w')  # Records best fitnesses
     perf = open('SystemReward_QL.txt', 'w')
     rel = open('Reliability_QL.txt', 'w')  # Records how successful trained NN is using "best" policy
+    eff = open('Alg_Time_QL.txt', 'w')
 
     for srun in range(p.stat_runs):
         print('current stat run: ', srun)
+        time_begin = process_time()
         ql.reset_qTable(); a.reset_agent()
 
         for ep in range(p.episodes):
@@ -126,6 +136,9 @@ def qLearn():
             a.reset_agent()
             learning.write('%f' % np.max(ql.qtable[:, :])); learning.write('\t')  # Records max reward in Qtable
 
+        time_end = process_time()
+        total_time = time_end - time_begin
+        eff.write('%f' % total_time); eff.write('\n')
 
         # Test Best Policy Found
         a.reset_agent(); k = 0
