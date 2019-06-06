@@ -12,19 +12,20 @@ def evo_net():
 
     # Initialize vectors and starting coordinates for agents and targets
     nn.create_NN(2, 3, 4)  # (n_inputs, n_outputs, hidden layer size)
-    a.assign_acoords(p.x_dim, p.y_dim)
-    t.assign_tcoords(p.x_dim, p.y_dim, a.ax_init, a.ay_init)
 
     # Create output files
     learning = open('BestFit_NN.txt', 'w')  # Records best fitnesses
     perf = open('SystemReward_NN.txt', 'w')
     rel = open('Reliability_NN.txt', 'w')  # Records how successful trained NN is using "best" policy
     eff = open('Alg_Time_NN.txt', 'w')
+    stp = open('Steps_Taken_NN.txt', 'w')
 
     for srun in range(p.stat_runs):
+        print('current stat run: ', srun)
+        a.assign_acoords(p.x_dim, p.y_dim)
+        t.assign_tcoords(p.x_dim, p.y_dim, a.ax_init, a.ay_init)
         time_begin = process_time()
         g.create_pop()  # (policy_size)
-        print('current stat run: ', srun)
 
         for j in range(g.population_size):  # Evaluate the initial population
             nn.get_weights(g.population[j])
@@ -46,7 +47,7 @@ def evo_net():
         learning.write('%f' % max(g.pop_fit)); learning.write('\t')
 
         # Train weights or neural network
-        for i in range(p.generations):
+        for i in range(p.generations-1):
             g.crossover(); g.mutate()  # Create new population for testing
             for j in range(g.population_size):  # Test offspring population
                 nn.get_weights(g.offspring_pop[j])
@@ -86,6 +87,7 @@ def evo_net():
             a.update_reward_NN(t.tx, t.ty)
 
             if a.goal_captured == True:
+                stp.write('%f' % k); stp.write('\n')
                 k = p.steps  # Stop iterating if target is captured
             k += 1
 
@@ -97,26 +99,27 @@ def evo_net():
         system_reward = a.agent_reward
         perf.write('%f' % system_reward); perf.write('\t')
         learning.write('\n'); perf.write('\n'); rel.write('\n')  # New line for new stat run
-    learning.close(); perf.close(); rel.close(); eff.close()
+    learning.close(); perf.close(); rel.close(); eff.close(); stp.close()
 
 def qLearn():
     a = agent.agent(); t = agent.target(); ql = QLearner.QLearner()
 
     # Initialize vectors and starting coordinates for agents and targets
     ql.reset_qTable()
-    a.assign_acoords(p.x_dim, p.y_dim)
-    t.assign_tcoords(p.x_dim, p.y_dim, a.ax_init, a.ay_init)
 
     # Create output files
     learning = open('BestFit_QL.txt', 'w')  # Records best fitnesses
     perf = open('SystemReward_QL.txt', 'w')
     rel = open('Reliability_QL.txt', 'w')  # Records how successful trained NN is using "best" policy
     eff = open('Alg_Time_QL.txt', 'w')
+    stp = open('Steps_Taken_QL.txt', 'w')
 
     for srun in range(p.stat_runs):
         print('current stat run: ', srun)
+        a.assign_acoords(p.x_dim, p.y_dim)
+        t.assign_tcoords(p.x_dim, p.y_dim, a.ax_init, a.ay_init)
         time_begin = process_time()
-        ql.reset_qTable(); a.reset_agent()
+        ql.reset_qTable()
 
         for ep in range(p.episodes):
 
@@ -151,6 +154,7 @@ def qLearn():
             a.update_reward_QL(t.tx, t.ty)
 
             if a.goal_captured == True:
+                stp.write('%f' % k); stp.write('\n')
                 k = p.steps  # Stop iterating if target is captured
             k += 1
 
@@ -162,7 +166,7 @@ def qLearn():
         system_reward = a.agent_reward  # Record system performance for stat run
         perf.write('%f' % system_reward); perf.write('\t')
         learning.write('\n'); perf.write('\n'); rel.write('\n')  # New line for new stat run
-    learning.close(); perf.close(); rel.close()
+    learning.close(); perf.close(); rel.close(); stp.close()
 
 
 def main():

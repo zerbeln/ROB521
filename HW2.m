@@ -8,12 +8,8 @@ close all; clear all; clc
 stat_runs = 30; %Choose which stat run to make path graph from
 NN_fit_data = load('BestFit_NN.txt');
 generations = 200;
-x = [1:(generations+1)];
-fitness = mean(NN_fit_data);
-plot(x, fitness)
-xlabel('Generations')
-ylabel('Fitness')
-title('Agent Learning Curve')
+x = [1:(generations)];
+fitness_NN = mean(NN_fit_data);
 
 %System Reward
 reward_data = load('SystemReward_NN.txt');
@@ -28,18 +24,15 @@ NN_percentage_rel = NN_sys_reliability*100
 NN_time_data = load('Alg_Time_NN.txt');
 NN_time = sum(NN_time_data)/stat_runs
 
+NN_steps_data = load('Steps_Taken_NN.txt');
+NN_avg_steps = sum(NN_steps_data)/stat_runs
+
 %% Q-Learning Data
 stat_runs = 30; %Choose which stat run to make path graph from
 QL_fit_data = load('BestFit_QL.txt');
 episodes = 200;
 x = [1:episodes];
-fitness = mean(QL_fit_data);
-
-figure()
-plot(x, fitness)
-xlabel('Episodes')
-ylabel('Fitness')
-title('Agent Learning Curve')
+fitness_QL = mean(QL_fit_data);
 
 %System Reward
 reward_data = load('SystemReward_QL.txt');
@@ -54,14 +47,16 @@ QL_percentage_rel = QL_sys_reliability*100
 QL_time_data = load('Alg_Time_QL.txt');
 QL_time = sum(QL_time_data)/stat_runs
 
+QL_steps_data = load('Steps_Taken_QL.txt');
+QL_avg_steps = sum(QL_steps_data)/stat_runs
+
 %% Graphs
 
-%Reliability
-XX = [1:stat_runs];
+%Combined Fit
 figure()
-plot(XX, NN_rel)
+plot(x, fitness_NN)
 hold on
-plot(XX, QL_rel)
-xlabel('Generations')
-ylabel('Percentage Reliability')
-title('Agent Reliability')
+plot(x, fitness_QL)
+xlabel('Episodes')
+ylabel('Fitness')
+title('Agent Learning Curve')

@@ -6,7 +6,7 @@ class Parameters:
     x_dim = 5
     y_dim = 5
     steps = 20
-    agent_method = 'EA'  # 'EA' for neuralnet, 'QLearn' for Q-Learner
+    agent_method = 'QLearn'  # 'EA' for neuralnet, 'QLearn' for Q-Learner
 
     # GA Parameters
     generations = 200
